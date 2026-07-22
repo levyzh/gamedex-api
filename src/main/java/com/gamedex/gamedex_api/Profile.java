@@ -30,6 +30,13 @@ public class Profile {
     // avatar_url column automatically, same as elsewhere.
     private String avatarUrl;
 
+    // Whether strangers may see this user's game list. Maps to the
+    // list_public column (camelCase↔snake_case, like avatarUrl). Added so
+    // the FEED can respect list privacy — a private list's entries should
+    // not surface in other people's feeds. Boolean (not boolean) so a null
+    // column value stays null rather than silently becoming false.
+    private Boolean listPublic;
+
     private OffsetDateTime createdAt;
 
     // JPA requires a no-arg constructor so Hibernate can build instances
@@ -40,8 +47,8 @@ public class Profile {
 
     // No public constructor at all — deliberately. This API never CREATES
     // profiles (Supabase Auth + the frontend own that). This entity exists
-    // only so we can READ profile info when serving comments. No setters,
-    // no mutation methods: read-only by shape.
+    // only so we can READ profile info when serving comments/follows/feed.
+    // No setters, no mutation methods: read-only by shape.
 
     public UUID getId() {
         return id;
@@ -57,6 +64,10 @@ public class Profile {
 
     public String getAvatarUrl() {
         return avatarUrl;
+    }
+
+    public Boolean getListPublic() {
+        return listPublic;
     }
 
     public OffsetDateTime getCreatedAt() {

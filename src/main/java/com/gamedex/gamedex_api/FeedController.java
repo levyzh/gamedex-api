@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 // /api/feed isn't in the public list, so it falls through to
 // anyRequest().authenticated().
 //
-// This is the first endpoint that spans THREE tables, all server-side:
+// Spans THREE tables, all server-side, in THREE queries (no N+1):
 // follows (who I follow) -> list (their entries) -> profiles (the authors).
-// It does so in exactly THREE queries, no N+1.
 @RestController
 public class FeedController {
 
@@ -40,25 +39,22 @@ public class FeedController {
         UUID me = UUID.fromString(jwt.getSubject());
 
         // 1. Who do I follow? Pull the followed ids out of my follow rows.
-        //    (I never follow myself — self-follow is rejected — so my own
-        //    entries can't appear in my feed. That's the behavior we want.)
+        //    (I never follow myself, so my own entries can't appear here.)
         List<UUID> followedIds = followRepository.findByFollowerId(me).stream()
                 .map(Follow::getFollowedId)
                 .toList();
 
-        // Guard: follow nobody -> empty feed, and skip the queries. An empty
-        // IN () clause is pointless and some DBs dislike it — return early.
+        // Guard: follow nobody -> empty feed, and skip the queries.
         if (followedIds.isEmpty()) {
             return List.of();
         }
 
-        // 2. Their newest 30 list entries, newest first. ONE query — the
-        //    finder name carries the limit, the IN, and the ordering.
+        // 2. Their newest 30 list entries, newest first — ONE query (the finder
+        //    name carries the limit, the IN, and the ordering).
         List<Entry> entries =
                 entryRepository.findTop30ByUserIdInOrderByAddedAtDesc(followedIds);
 
-        // 3. Batch-load the author profiles in ONE query (the same
-        //    findAllById pattern the follows lists use), keyed by id so the
+        // 3. Batch-load the author profiles in ONE query, keyed by id so the
         //    stitch step is a cheap map lookup instead of a query per row.
         List<UUID> authorIds = entries.stream()
                 .map(Entry::getUserId)
@@ -67,16 +63,27 @@ public class FeedController {
         Map<UUID, Profile> authors = profileRepository.findAllById(authorIds).stream()
                 .collect(Collectors.toMap(Profile::getId, p -> p));
 
-        // 4. Stitch each entry to its author and map to the wire shape. Order
-        //    is already newest-first from the DB, so we keep it.
+        // 4. Stitch each entry to its author and map to the wire shape, but
+        //    FIRST respect list privacy: if the author's list is private
+        //    (list_public = false), their entries are dropped from the feed —
+        //    a private list shouldn't leak through someone else's feed. A null
+        //    author (shouldn't happen for a followed user) or a null flag is
+        //    treated as public (the column has a default; this is defensive).
+        //    NOTE: this filter runs AFTER the 30-cap, so a feed dominated by
+        //    private-list follows can return fewer than 30 items. Fine at this
+        //    scale; revisit with a DB-side join+filter if it ever matters.
         return entries.stream()
+                .filter(e -> {
+                    Profile author = authors.get(e.getUserId());
+                    return author != null
+                            && !Boolean.FALSE.equals(author.getListPublic());
+                })
                 .map(e -> FeedItemResponse.from(e, authors.get(e.getUserId())))
                 .toList();
     }
 
     // Mirrors the frontend FeedItem EXACTLY: flat entry fields + a nested
-    // author. Note there is NO `hours` here — the feed doesn't show it, and
-    // FeedItem doesn't carry it.
+    // author. Note there is NO `hours` here — the feed doesn't show it.
     public record FeedItemResponse(
             UUID userId,
             Integer gameId,
@@ -101,8 +108,6 @@ public class FeedController {
     // The nested author block: { username, avatarUrl } — matches FeedItem.author.
     public record Author(String username, String avatarUrl) {
         public static Author from(Profile p) {
-            // A followed user should always have a profile row, but guard
-            // against a missing one rather than risk a NullPointerException.
             if (p == null) {
                 return new Author("unknown", null);
             }
