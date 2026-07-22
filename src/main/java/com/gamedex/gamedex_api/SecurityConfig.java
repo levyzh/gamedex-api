@@ -43,6 +43,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/*/follow-stats").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/*/followers").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/*/following").permitAll()
+                        // List READ is public (Stage D public-read: friends'
+                        // lists must show logged-out). The list WRITES live on a
+                        // different path (PUT/DELETE /api/list/*) and are NOT
+                        // listed, so they fall through to anyRequest() -> JWT.
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/list").permitAll()
                         // Everything else needs a valid Supabase JWT.
                         .anyRequest().authenticated()
                 )
