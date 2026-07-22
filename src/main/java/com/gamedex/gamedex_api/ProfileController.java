@@ -79,6 +79,12 @@ public class ProfileController {
                     "Usernames must be 3-20 characters, using only lowercase letters, numbers, and underscores.");
         }
 
+        // The bio column is NOT NULL (default '') in the DB. The frontend always
+        // sends a string, but a null from any other caller would make the DB
+        // reject the write with an ugly 500. Coerce null -> "" so the invariant
+        // "bio is never null" is guaranteed here, at the trusted boundary.
+        String bio = (body.bio() == null) ? "" : body.bio();
+
         // Load MY row (by the token subject) — THIS is what makes it
         // impossible to edit anyone else's profile. It always exists thanks
         // to the signup trigger, but guard anyway.
@@ -86,7 +92,7 @@ public class ProfileController {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Your profile row is missing"));
 
-        p.editProfile(body.username(), body.bio(), body.listPublic());
+        p.editProfile(body.username(), bio, body.listPublic());
 
         // saveAndFlush (not save): force the write to hit the DB NOW, so a
         // duplicate-username violation is thrown HERE where we can catch and
