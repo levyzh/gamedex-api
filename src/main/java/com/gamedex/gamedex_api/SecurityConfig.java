@@ -36,6 +36,13 @@ public class SecurityConfig {
                         // reads are public; writes on this same path fall
                         // through to anyRequest() below and need a JWT.
                         .requestMatchers(HttpMethod.GET, "/api/games/*/comments").permitAll()
+                        // Follows READS are public too — a profile page (its
+                        // follower counts and lists) must work logged-out. The
+                        // WRITES (POST/DELETE /api/users/*/follow) are NOT listed
+                        // here, so they fall through to anyRequest() and need a JWT.
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/follow-stats").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/followers").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/*/following").permitAll()
                         // Everything else needs a valid Supabase JWT.
                         .anyRequest().authenticated()
                 )
