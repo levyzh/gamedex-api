@@ -1,4 +1,4 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.config;
 
 import java.util.List;
 

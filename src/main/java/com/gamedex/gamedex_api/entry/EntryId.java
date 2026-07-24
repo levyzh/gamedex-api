@@ -1,4 +1,4 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.entry;
 
 import java.io.Serializable;
 import java.util.Objects;

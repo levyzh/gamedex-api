@@ -1,4 +1,4 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.comment;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

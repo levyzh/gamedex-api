@@ -1,5 +1,7 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.comment;
 
+import com.gamedex.gamedex_api.profile.Profile;
+import com.gamedex.gamedex_api.profile.ProfileRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;

@@ -1,4 +1,4 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.comment;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

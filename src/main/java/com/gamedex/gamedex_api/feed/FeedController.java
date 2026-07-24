@@ -1,4 +1,4 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.feed;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -6,6 +6,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.gamedex.gamedex_api.entry.Entry;
+import com.gamedex.gamedex_api.entry.EntryRepository;
+import com.gamedex.gamedex_api.follow.Follow;
+import com.gamedex.gamedex_api.follow.FollowRepository;
+import com.gamedex.gamedex_api.profile.Profile;
+import com.gamedex.gamedex_api.profile.ProfileRepository;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;

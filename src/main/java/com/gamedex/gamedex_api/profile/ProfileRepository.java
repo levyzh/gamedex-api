@@ -1,4 +1,4 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.profile;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;

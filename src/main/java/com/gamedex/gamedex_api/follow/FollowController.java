@@ -1,5 +1,7 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.follow;
 
+import com.gamedex.gamedex_api.profile.Profile;
+import com.gamedex.gamedex_api.profile.ProfileRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

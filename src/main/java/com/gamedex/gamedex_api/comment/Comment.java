@@ -1,5 +1,6 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.comment;
 
+import com.gamedex.gamedex_api.profile.Profile;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

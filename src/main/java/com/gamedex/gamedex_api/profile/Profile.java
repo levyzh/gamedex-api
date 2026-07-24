@@ -1,4 +1,4 @@
-package com.gamedex.gamedex_api;
+package com.gamedex.gamedex_api.profile;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
